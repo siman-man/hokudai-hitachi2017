@@ -2,14 +2,41 @@
 #include <cstdlib>
 #include <iostream>
 #include <cmath>
+#include <cassert>
 #include <string.h>
 #include <vector>
 
 using namespace std;
+typedef long long ll;
 
-const int MAX_N = 60 + 1;
-const int MAX_V = 500 + 1;
-const int MAX_V_EMB = 3600 + 1;
+const int MAX_N = 60;
+const int MAX_V = 500;
+const int MAX_V_EMB = 3600;
+
+double TIME_LIMIT = 10.0;
+const ll CYCLE_PER_SEC = 2700000000;
+
+const int DY[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
+const int DX[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
+
+unsigned long long xor128() {
+    static unsigned long long rx = 123456789, ry = 362436069, rz = 521288629, rw = 88675123;
+    unsigned long long rt = (rx ^ (rx << 11));
+    rx = ry;
+    ry = rz;
+    rz = rw;
+    return (rw = (rw ^ (rw >> 19)) ^ (rt ^ (rt >> 8)));
+}
+
+unsigned long long int getCycle() {
+    unsigned int low, high;
+    __asm__ volatile ("rdtsc" : "=a" (low), "=d" (high));
+    return ((unsigned long long int) low) | ((unsigned long long int) high << 32);
+}
+
+double getTime(unsigned long long int begin_cycle) {
+    return (double) (getCycle() - begin_cycle) / CYCLE_PER_SEC;
+}
 
 struct Edge {
     int from;
@@ -36,10 +63,12 @@ struct Mapping {
 int V, V_emb;
 int E, E_emb;
 int N;
+ll startCycle;
 
 bool edgeMapG[MAX_V][MAX_V];
 bool edgeMapGemb[MAX_V_EMB][MAX_V_EMB];
-int vertexMapping[MAX_V_EMB];
+int vertexMapGemb[MAX_N][MAX_N];
+int vertexMapping[MAX_V];
 int edgeWeight[MAX_V][MAX_V];
 
 class AtCoder {
@@ -47,6 +76,7 @@ public:
     void init(vector <Edge> G, vector <Edge> G_emb) {
         memset(edgeMapG, false, sizeof(edgeMapG));
         memset(edgeMapGemb, false, sizeof(edgeMapGemb));
+        memset(vertexMapGemb, -1, sizeof(vertexMapGemb));
         memset(vertexMapping, -1, sizeof(vertexMapping));
         memset(edgeWeight, 0, sizeof(edgeWeight));
         N = (int) sqrt(V_emb);
@@ -57,9 +87,10 @@ public:
 
         int y = 0;
         int x = 0;
-        for (int i = 1; i <= V; i++) {
-            int z = y * N + x + 1;
+        for (int i = 0; i < V; i++) {
+            int z = y * N + x;
             vertexMapping[i] = z;
+            vertexMapGemb[y][x] = i;
 
             x++;
             if (x == n) {
@@ -82,22 +113,77 @@ public:
     }
 
     vector <Mapping> mapping(vector <Edge> G, vector <Edge> G_emb) {
+        startCycle = getCycle();
         init(G, G_emb);
 
-        int score = calcScore();
-        fprintf(stderr, "Score = %d\n", score);
+        mappingVertex();
 
         return createAnswer();
     }
 
     void mappingVertex() {
+        int bestScore = calcScore();
+        int bestVertexMapping[MAX_V];
+        memcpy(bestVertexMapping, vertexMapping, sizeof(vertexMapping));
+        double currentTime = getTime(startCycle);
+        double remainTime = 0.0;
+        ll tryCount = 0;
+        int R = 500000;
+        double k = 1.0;
+
+        int currentScore = bestScore;
+
+        while (currentTime < TIME_LIMIT) {
+            currentTime = getTime(startCycle);
+            remainTime = (TIME_LIMIT - currentTime) / TIME_LIMIT;
+
+            int n = xor128() % V;
+            int m = xor128() % V;
+
+            int diffScore = calcScoreSub(n) + calcScoreSub(m);
+            swapVertexMapping(n, m);
+            diffScore -= calcScoreSub(n) + calcScoreSub(m);
+
+            int score = currentScore - diffScore;
+
+            if (bestScore < score) {
+                bestScore = score;
+                memcpy(bestVertexMapping, vertexMapping, sizeof(vertexMapping));
+            }
+
+            if (currentScore < score || (xor128() % R < R * exp(-diffScore / (k * remainTime)))) {
+                currentScore = score;
+            } else {
+                swapVertexMapping(n, m);
+            }
+
+            tryCount++;
+        }
+
+        memcpy(vertexMapping, bestVertexMapping, sizeof(bestVertexMapping));
+        fprintf(stderr, "BestScore = %d, tryCount = %lld\n", bestScore, tryCount);
+    }
+
+    void swapVertexMapping(int i, int j) {
+        int t = vertexMapping[i];
+        int s = vertexMapping[j];
+        vertexMapping[i] = s;
+        vertexMapping[j] = t;
+
+        int y1 = t / N;
+        int x1 = t % N;
+        int y2 = s / N;
+        int x2 = s % N;
+
+        vertexMapGemb[y1][x1] = j;
+        vertexMapGemb[y2][x2] = i;
     }
 
     int calcScore() {
         int score = 0;
 
-        for (int i = 1; i < V; i++) {
-            for (int j = i + 1; j <= V; j++) {
+        for (int i = 0; i < V - 1; i++) {
+            for (int j = i + 1; j < V; j++) {
                 if (edgeMapGemb[vertexMapping[i]][vertexMapping[j]]) {
                     score += edgeWeight[i][j];
                 }
@@ -107,11 +193,29 @@ public:
         return score;
     }
 
+    int calcScoreSub(int v) {
+        int z = vertexMapping[v];
+        int score = 0;
+        int y = z / N;
+        int x = z % N;
+        assert(v != -1);
+
+        for (int i = 0; i < 8; i++) {
+            int ny = y + DY[i];
+            int nx = x + DX[i];
+            if (ny < 0 || ny >= N || nx < 0 || nx >= N) continue;
+            if (vertexMapGemb[ny][nx] == -1) continue;
+            score += edgeWeight[v][vertexMapGemb[ny][nx]];
+        }
+
+        return score;
+    }
+
     vector <Mapping> createAnswer() {
         vector <Mapping> ret;
 
-        for (int i = 1; i <= V; i++) {
-            ret.push_back(Mapping(i, vertexMapping[i]));
+        for (int i = 0; i < V; i++) {
+            ret.push_back(Mapping(i + 1, vertexMapping[i] + 1));
         }
 
         return ret;
@@ -124,7 +228,7 @@ int main() {
     cin >> V >> E;
     for (int i = 0; i < E; i++) {
         cin >> u >> v >> w;
-        G.push_back(Edge(u, v, w));
+        G.push_back(Edge(u - 1, v - 1, w));
     }
 
     int a, b;
@@ -132,7 +236,7 @@ int main() {
     cin >> V_emb >> E_emb;
     for (int i = 0; i < E_emb; i++) {
         cin >> a >> b;
-        G_emb.push_back(Edge(a, b));
+        G_emb.push_back(Edge(a - 1, b - 1));
     }
 
     AtCoder ac;
