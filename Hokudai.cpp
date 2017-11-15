@@ -35,6 +35,7 @@ struct Mapping {
 
 int V, V_emb;
 int E, E_emb;
+int N;
 
 bool edgeMapG[MAX_V][MAX_V];
 bool edgeMapGemb[MAX_V_EMB][MAX_V_EMB];
@@ -48,9 +49,23 @@ public:
         memset(edgeMapGemb, false, sizeof(edgeMapGemb));
         memset(vertexMapping, -1, sizeof(vertexMapping));
         memset(edgeWeight, 0, sizeof(edgeWeight));
+        N = (int) sqrt(V_emb);
 
+        int n = (int) ceil(sqrt(V));
+
+        fprintf(stderr, "n = %d, N = %d\n", n, N);
+
+        int y = 0;
+        int x = 0;
         for (int i = 1; i <= V; i++) {
-            vertexMapping[i] = i;
+            int z = y * N + x + 1;
+            vertexMapping[i] = z;
+
+            x++;
+            if (x == n) {
+                x = 0;
+                y++;
+            }
         }
 
         for (int i = 0; i < E; i++) {
@@ -73,6 +88,9 @@ public:
         fprintf(stderr, "Score = %d\n", score);
 
         return createAnswer();
+    }
+
+    void mappingVertex() {
     }
 
     int calcScore() {
