@@ -4,7 +4,7 @@ require 'rake/clean'
 PROBLEM_NAME = "Hokudai"
 ROUND_ID = 16981
 TESTER = "#{PROBLEM_NAME}.jar"
-SEED = 3
+SEED = 1
 
 CLEAN.include %w(data/* *.gcda *.gcov *.gcno *.png)
 
@@ -23,7 +23,8 @@ task one: [:compile] do
   if ENV["debug"]
     sh("time java -jar #{TESTER} -seed #{SEED} -debug -novis -exec './#{PROBLEM_NAME}'")
   else
-    sh("time java -jar #{TESTER} -seed #{SEED} -novis -exec './#{PROBLEM_NAME}'")
+    sh("time ./#{PROBLEM_NAME} < testcases/random_testcase_#{SEED}.in > result.txt")
+    sh("./score_evaluator.out testcases/random_testcase_#{SEED}.in result.txt")
   end
 end
 
