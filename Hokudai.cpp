@@ -33,27 +33,60 @@ struct Mapping {
     }
 };
 
-int V;
-int E;
+int V, V_emb;
+int E, E_emb;
 
-bool edgeMap[MAX_N][MAX_N];
+bool edgeMapG[MAX_V][MAX_V];
+bool edgeMapGemb[MAX_V_EMB][MAX_V_EMB];
 int vertexMapping[MAX_V_EMB];
+int edgeWeight[MAX_V][MAX_V];
 
 class AtCoder {
 public:
     void init(vector <Edge> G, vector <Edge> G_emb) {
-        memset(edgeMap, false, sizeof(edgeMap));
+        memset(edgeMapG, false, sizeof(edgeMapG));
+        memset(edgeMapGemb, false, sizeof(edgeMapGemb));
         memset(vertexMapping, -1, sizeof(vertexMapping));
+        memset(edgeWeight, 0, sizeof(edgeWeight));
 
         for (int i = 1; i <= V; i++) {
             vertexMapping[i] = i;
+        }
+
+        for (int i = 0; i < E; i++) {
+            Edge edge = G[i];
+            edgeWeight[edge.from][edge.to] = edge.weight;
+            edgeWeight[edge.to][edge.from] = edge.weight;
+        }
+
+        for (int i = 0; i < E_emb; i++) {
+            Edge edge = G_emb[i];
+            edgeMapGemb[edge.from][edge.to] = true;
+            edgeMapGemb[edge.to][edge.from] = true;
         }
     }
 
     vector <Mapping> mapping(vector <Edge> G, vector <Edge> G_emb) {
         init(G, G_emb);
 
+        int score = calcScore();
+        fprintf(stderr, "Score = %d\n", score);
+
         return createAnswer();
+    }
+
+    int calcScore() {
+        int score = 0;
+
+        for (int i = 1; i < V; i++) {
+            for (int j = i + 1; j <= V; j++) {
+                if (edgeMapGemb[vertexMapping[i]][vertexMapping[j]]) {
+                    score += edgeWeight[i][j];
+                }
+            }
+        }
+
+        return score;
     }
 
     vector <Mapping> createAnswer() {
@@ -76,7 +109,6 @@ int main() {
         G.push_back(Edge(u, v, w));
     }
 
-    int V_emb, E_emb;
     int a, b;
     vector <Edge> G_emb;
     cin >> V_emb >> E_emb;
