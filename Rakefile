@@ -52,7 +52,7 @@ end
 
 desc "production test"
 task test: [:compile] do
-  run_test(1000..1100)
+  run_test(1..100)
 end
 
 desc "system test"
@@ -77,7 +77,8 @@ def run_test(seeds)
       file.puts("----- !BEGIN! ------")
       file.puts("Seed = #{seed}")
 
-      data = Open3.capture3("time java -jar #{TESTER} -seed #{seed} -novis -exec './#{PROBLEM_NAME}'")
+      sh("./#{PROBLEM_NAME} < testcases/random_testcase_#{seed}.in > output")
+      data = Open3.capture3("./score_evaluator.out testcases/random_testcase_#{seed}.in output")
       file.puts(data.select { |d| d.is_a?(String) }.flat_map { |d| d.split("\n") })
       file.puts("----- !END! ------")
     end

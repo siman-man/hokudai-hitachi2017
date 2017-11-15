@@ -129,7 +129,7 @@ public:
         double remainTime = 0.0;
         ll tryCount = 0;
         int R = 500000;
-        double k = 1.0;
+        double k = 4.0;
 
         int currentScore = bestScore;
 
