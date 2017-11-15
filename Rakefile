@@ -4,7 +4,7 @@ require 'rake/clean'
 PROBLEM_NAME = "Hokudai"
 ROUND_ID = 16981
 TESTER = "#{PROBLEM_NAME}.jar"
-SEED = 1
+SEED = 3
 
 CLEAN.include %w(data/* *.gcda *.gcov *.gcno *.png)
 

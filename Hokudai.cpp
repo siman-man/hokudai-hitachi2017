@@ -60,6 +60,16 @@ struct Mapping {
     }
 };
 
+struct Coord {
+    int y;
+    int x;
+
+    Coord(int y = -1, int x = -1) {
+        this->y = y;
+        this->x = x;
+    }
+};
+
 int V, V_emb;
 int E, E_emb;
 int N;
@@ -70,6 +80,7 @@ bool edgeMapGemb[MAX_V_EMB][MAX_V_EMB];
 int vertexMapGemb[MAX_N][MAX_N];
 int vertexMapping[MAX_V];
 int edgeWeight[MAX_V][MAX_V];
+Coord coordList[MAX_V_EMB];
 
 class AtCoder {
 public:
@@ -109,6 +120,12 @@ public:
             Edge edge = G_emb[i];
             edgeMapGemb[edge.from][edge.to] = true;
             edgeMapGemb[edge.to][edge.from] = true;
+        }
+
+        for (int i = 0; i < MAX_V_EMB; i++) {
+            int y = i / N;
+            int x = i % N;
+            coordList[i] = Coord(y, x);
         }
     }
 
@@ -170,13 +187,11 @@ public:
         vertexMapping[i] = s;
         vertexMapping[j] = t;
 
-        int y1 = t / N;
-        int x1 = t % N;
-        int y2 = s / N;
-        int x2 = s % N;
+        Coord c1 = coordList[t];
+        Coord c2 = coordList[s];
 
-        vertexMapGemb[y1][x1] = j;
-        vertexMapGemb[y2][x2] = i;
+        vertexMapGemb[c1.y][c1.x] = j;
+        vertexMapGemb[c2.y][c2.x] = i;
     }
 
     int calcScore() {
@@ -196,13 +211,12 @@ public:
     int calcScoreSub(int v) {
         int z = vertexMapping[v];
         int score = 0;
-        int y = z / N;
-        int x = z % N;
+        Coord c = coordList[z];
         assert(v != -1);
 
         for (int i = 0; i < 8; i++) {
-            int ny = y + DY[i];
-            int nx = x + DX[i];
+            int ny = c.y + DY[i];
+            int nx = c.x + DX[i];
             if (ny < 0 || ny >= N || nx < 0 || nx >= N) continue;
             if (vertexMapGemb[ny][nx] == -1) continue;
             score += edgeWeight[v][vertexMapGemb[ny][nx]];
