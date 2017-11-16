@@ -99,7 +99,7 @@ public:
 
         int n = (int) ceil(sqrt(V));
 
-        fprintf(stderr, "n = %d, N = %d\n", n, N);
+        fprintf(stderr, "V = %d, n = %d, N = %d\n", V, n, N);
 
         for (int i = 0; i < V; i++) {
             nodeList.push_back(Node());
@@ -110,8 +110,10 @@ public:
             edgeWeight[edge.from][edge.to] = edge.weight;
             edgeWeight[edge.to][edge.from] = edge.weight;
 
-            nodeList[edge.from].neighbors.push_back(edge.to);
-            nodeList[edge.to].neighbors.push_back(edge.from);
+            for (int j = 0; j < edge.weight; j++) {
+                nodeList[edge.from].neighbors.push_back(edge.to);
+                nodeList[edge.to].neighbors.push_back(edge.from);
+            }
         }
 
         for (int i = 0; i < E_emb; i++) {
@@ -126,10 +128,11 @@ public:
             coordList[i] = Coord(y, x);
         }
 
-        int y = 0;
-        int x = 1;
-        vertexMapping[0] = 0;
-        vertexMapGemb[0][0] = 0;
+        int offset = (N - n) / 2;
+        int y = offset;
+        int x = 1 + offset;
+        vertexMapping[0] = offset * N + offset;
+        vertexMapGemb[offset][offset] = 0;
 
         for (int i = 1; i < V; i++) {
             int z = y * N + x;
@@ -157,8 +160,8 @@ public:
             vertexMapGemb[y][x] = maxId;
 
             x++;
-            if (x == n) {
-                x = 0;
+            if (x == n + offset) {
+                x = offset;
                 y++;
             }
         }
@@ -192,6 +195,7 @@ public:
 
             int v = xor128() % V;
             int t = vertexMapping[v];
+            if (nodeList[v].neighbors.size() == 0) continue;
             int i = xor128() % nodeList[v].neighbors.size();
             int j = xor128() % 8;
             int z = vertexMapping[nodeList[v].neighbors[i]] + DD[j];

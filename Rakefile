@@ -4,7 +4,8 @@ require 'rake/clean'
 PROBLEM_NAME = "Hokudai"
 ROUND_ID = 16981
 TESTER = "#{PROBLEM_NAME}.jar"
-SEED = 3
+SEED = 48
+TEST_TYPE = ["random", "perfect"][0]
 
 CLEAN.include %w(data/* *.gcda *.gcov *.gcno *.png)
 
@@ -23,8 +24,8 @@ task one: [:compile] do
   if ENV["debug"]
     sh("time java -jar #{TESTER} -seed #{SEED} -debug -novis -exec './#{PROBLEM_NAME}'")
   else
-    sh("time ./#{PROBLEM_NAME} < testcases/random_testcase_#{SEED}.in > result.txt")
-    sh("./score_evaluator.out testcases/random_testcase_#{SEED}.in result.txt")
+    sh("time ./#{PROBLEM_NAME} < testcases/#{TEST_TYPE}_testcase_#{SEED}.in > result.txt")
+    sh("./score_evaluator.out testcases/#{TEST_TYPE}_testcase_#{SEED}.in result.txt")
   end
 end
 
@@ -77,8 +78,8 @@ def run_test(seeds)
       file.puts("----- !BEGIN! ------")
       file.puts("Seed = #{seed}")
 
-      sh("./#{PROBLEM_NAME} < testcases/random_testcase_#{seed}.in > output")
-      data = Open3.capture3("./score_evaluator.out testcases/random_testcase_#{seed}.in output")
+      sh("./#{PROBLEM_NAME} < testcases/#{TEST_TYPE}_testcase_#{seed}.in > output")
+      data = Open3.capture3("./score_evaluator.out testcases/#{TEST_TYPE}_testcase_#{seed}.in output")
       file.puts(data.select { |d| d.is_a?(String) }.flat_map { |d| d.split("\n") })
       file.puts("----- !END! ------")
     end
