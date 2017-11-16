@@ -237,6 +237,7 @@ public:
 };
 
 int main() {
+    TIME_LIMIT = 2.0;
     int u, v, w;
     vector <Edge> G;
     cin >> V >> E;
