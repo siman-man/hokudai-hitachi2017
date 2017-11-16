@@ -232,10 +232,8 @@ public:
     }
 
     int calcScoreSub(int v) {
-        int z = vertexMapping[v];
         int score = 0;
-        Coord c = coordList[z];
-        assert(v != -1);
+        Coord c = coordList[vertexMapping[v]];
 
         for (int i = 0; i < 8; i++) {
             int ny = c.y + DY[i];
