@@ -191,7 +191,7 @@ public:
                 memcpy(bestVertexMapping, vertexMapping, sizeof(vertexMapping));
             }
 
-            if (currentScore < score || (xor128() % R < R * exp(-diffScore / (k * remainTime)))) {
+            if (currentScore < score || (diffScore < 30 && xor128() % R < R * exp(-diffScore / (k * remainTime)))) {
                 currentScore = score;
             } else {
                 swapVertexMapping(n, m);
