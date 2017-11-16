@@ -96,20 +96,6 @@ public:
 
         fprintf(stderr, "n = %d, N = %d\n", n, N);
 
-        int y = 0;
-        int x = 0;
-        for (int i = 0; i < V; i++) {
-            int z = y * N + x;
-            vertexMapping[i] = z;
-            vertexMapGemb[y][x] = i;
-
-            x++;
-            if (x == n) {
-                x = 0;
-                y++;
-            }
-        }
-
         for (int i = 0; i < E; i++) {
             Edge edge = G[i];
             edgeWeight[edge.from][edge.to] = edge.weight;
@@ -126,6 +112,43 @@ public:
             int y = i / N;
             int x = i % N;
             coordList[i] = Coord(y, x);
+        }
+
+        int y = 0;
+        int x = 1;
+        vertexMapping[0] = 0;
+        vertexMapGemb[0][0] = 0;
+
+        for (int i = 1; i < V; i++) {
+            int z = y * N + x;
+            int maxScore = -1;
+            int maxId = -1;
+
+            for (int j = 0; j < V; j++) {
+                if (vertexMapping[j] != -1) continue;
+
+                vertexMapping[j] = z;
+                vertexMapGemb[y][x] = j;
+
+                int score = calcScoreSub(j);
+                assert(score >= 0);
+                if (maxScore < score) {
+                    maxScore = score;
+                    maxId = j;
+                }
+
+                vertexMapping[j] = -1;
+                vertexMapGemb[y][x] = -1;
+            }
+
+            vertexMapping[maxId] = z;
+            vertexMapGemb[y][x] = maxId;
+
+            x++;
+            if (x == n) {
+                x = 0;
+                y++;
+            }
         }
     }
 
