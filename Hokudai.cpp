@@ -50,6 +50,10 @@ struct Edge {
     }
 };
 
+struct Node {
+    vector<int> neighbors;
+};
+
 struct Mapping {
     int from;
     int to;
@@ -81,6 +85,7 @@ int vertexMapGemb[MAX_N][MAX_N];
 int vertexMapping[MAX_V];
 int edgeWeight[MAX_V][MAX_V];
 Coord coordList[MAX_V_EMB];
+vector<Node> nodeList;
 
 class AtCoder {
 public:
@@ -96,10 +101,17 @@ public:
 
         fprintf(stderr, "n = %d, N = %d\n", n, N);
 
+        for (int i = 0; i < V; i++) {
+            nodeList.push_back(Node());
+        }
+
         for (int i = 0; i < E; i++) {
             Edge edge = G[i];
             edgeWeight[edge.from][edge.to] = edge.weight;
             edgeWeight[edge.to][edge.from] = edge.weight;
+
+            nodeList[edge.from].neighbors.push_back(edge.to);
+            nodeList[edge.to].neighbors.push_back(edge.from);
         }
 
         for (int i = 0; i < E_emb; i++) {
@@ -170,6 +182,7 @@ public:
         ll tryCount = 0;
         int R = 500000;
         double k = 4.0;
+        int DD[8] = {-N-1, -N, -N+1, -1, 1, N-1, N, N+1};
 
         int currentScore = bestScore;
 
@@ -177,12 +190,23 @@ public:
             currentTime = getTime(startCycle);
             remainTime = (TIME_LIMIT - currentTime) / TIME_LIMIT;
 
-            int n = xor128() % V;
-            int m = xor128() % V;
+            int v = xor128() % V;
+            int t = vertexMapping[v];
+            int i = xor128() % nodeList[v].neighbors.size();
+            int j = xor128() % 8;
+            int z = vertexMapping[nodeList[v].neighbors[i]] + DD[j];
+            int y = z / N;
+            int x = z % N;
+            if (y < 0 || y >= N || x < 0 || x >= N) continue;
+            int m = vertexMapGemb[y][x];
 
-            int diffScore = calcScoreSub(n) + calcScoreSub(m);
-            swapVertexMapping(n, m);
-            diffScore -= calcScoreSub(n) + calcScoreSub(m);
+            int diffScore = calcScoreSub(v) + calcScoreSub(m);
+            if (m == -1) {
+                moveVertex(v, z);
+            } else {
+                swapVertexMapping(v, m);
+            }
+            diffScore -= calcScoreSub(v) + calcScoreSub(m);
 
             int score = currentScore - diffScore;
 
@@ -194,7 +218,11 @@ public:
             if (currentScore < score || (diffScore < 30 && xor128() % R < R * exp(-diffScore / (k * remainTime)))) {
                 currentScore = score;
             } else {
-                swapVertexMapping(n, m);
+                if (m == -1) {
+                    moveVertex(v, t);
+                } else {
+                    swapVertexMapping(v, m);
+                }
             }
 
             tryCount++;
@@ -202,6 +230,15 @@ public:
 
         memcpy(vertexMapping, bestVertexMapping, sizeof(bestVertexMapping));
         fprintf(stderr, "BestScore = %d, tryCount = %lld\n", bestScore, tryCount);
+    }
+
+    void moveVertex(int v, int z) {
+        int t = vertexMapping[v];
+        vertexMapping[v] = z;
+        Coord c1 = coordList[z];
+        Coord c2 = coordList[t];
+        vertexMapGemb[c1.y][c1.x] = v;
+        vertexMapGemb[c2.y][c2.x] = -1;
     }
 
     void swapVertexMapping(int i, int j) {
@@ -232,6 +269,7 @@ public:
     }
 
     int calcScoreSub(int v) {
+        if (v == -1) return 0;
         int score = 0;
         Coord c = coordList[vertexMapping[v]];
 
