@@ -202,15 +202,15 @@ public:
             int y = z / N;
             int x = z % N;
             if (y < 0 || y >= N || x < 0 || x >= N) continue;
-            int m = vertexMapGemb[y][x];
+            int u = vertexMapGemb[y][x];
 
-            int diffScore = calcScoreSub(v) + calcScoreSub(m);
-            if (m == -1) {
+            int diffScore = calcScoreSub(v) + calcScoreSub(u);
+            if (u == -1) {
                 moveVertex(v, z);
             } else {
-                swapVertexMapping(v, m);
+                swapVertexMapping(v, u);
             }
-            diffScore -= calcScoreSub(v) + calcScoreSub(m);
+            diffScore -= calcScoreSub(v) + calcScoreSub(u);
 
             int score = currentScore - diffScore;
 
@@ -222,10 +222,10 @@ public:
             if (currentScore < score || (diffScore < 30 && xor128() % R < R * exp(-diffScore / (k * remainTime)))) {
                 currentScore = score;
             } else {
-                if (m == -1) {
+                if (u == -1) {
                     moveVertex(v, t);
                 } else {
-                    swapVertexMapping(v, m);
+                    swapVertexMapping(v, u);
                 }
             }
 
