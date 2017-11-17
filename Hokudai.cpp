@@ -199,6 +199,7 @@ public:
             int i = xor128() % nodeList[v].neighbors.size();
             int j = xor128() % 8;
             int z = vertexMapping[nodeList[v].neighbors[i]] + DD[j];
+            if (t == z) continue;
             int y = z / N;
             int x = z % N;
             if (y < 0 || y >= N || x < 0 || x >= N) continue;
