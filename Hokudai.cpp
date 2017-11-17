@@ -188,10 +188,18 @@ public:
         int DD[8] = {-N - 1, -N, -N + 1, -1, 1, N - 1, N, N + 1};
 
         int currentScore = bestScore;
+        int thread = 30;
+        double expCache[thread];
 
         while (currentTime < TIME_LIMIT) {
-            currentTime = getTime(startCycle);
-            remainTime = (TIME_LIMIT - currentTime) / TIME_LIMIT;
+            if (tryCount % 100000 == 0) {
+                currentTime = getTime(startCycle);
+                remainTime = (TIME_LIMIT - currentTime) / TIME_LIMIT;
+
+                for (int i = 0; i < thread; i++) {
+                    expCache[i] = -1.0;
+                }
+            }
 
             int v = xor128() % V + 1;
             int t = vertexMapping[v];
@@ -220,7 +228,11 @@ public:
                 memcpy(bestVertexMapping, vertexMapping, sizeof(vertexMapping));
             }
 
-            if (currentScore < score || (diffScore < 30 && xor128() % R < R * exp(-diffScore / (k * remainTime)))) {
+            if (expCache[diffScore] == -1 && currentScore >= score && diffScore < thread) {
+                expCache[diffScore] = R * exp(-diffScore / (k * remainTime));
+            }
+
+            if (currentScore < score || (diffScore < thread && xor128() % R < expCache[diffScore])) {
                 currentScore = score;
             } else {
                 if (u == 0) {
