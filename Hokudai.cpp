@@ -101,7 +101,7 @@ public:
 
         fprintf(stderr, "V = %d, n = %d, N = %d\n", V, n, N);
 
-        for (int i = 0; i < V; i++) {
+        for (int i = 0; i <= V; i++) {
             nodeList.push_back(Node());
         }
 
@@ -131,15 +131,15 @@ public:
         int offset = (N - n) / 2;
         int y = offset;
         int x = 1 + offset;
-        vertexMapping[0] = offset * N + offset;
-        vertexMapGemb[offset][offset] = 0;
+        vertexMapping[1] = offset * N + offset;
+        vertexMapGemb[offset][offset] = 1;
 
-        for (int i = 1; i < V; i++) {
+        for (int i = 2; i <= V; i++) {
             int z = y * N + x;
             int maxScore = -1;
             int maxId = -1;
 
-            for (int j = 0; j < V; j++) {
+            for (int j = 1; j <= V; j++) {
                 if (vertexMapping[j] != -1) continue;
 
                 vertexMapping[j] = z;
@@ -193,7 +193,7 @@ public:
             currentTime = getTime(startCycle);
             remainTime = (TIME_LIMIT - currentTime) / TIME_LIMIT;
 
-            int v = xor128() % V;
+            int v = xor128() % V + 1;
             int t = vertexMapping[v];
             if (nodeList[v].neighbors.size() == 0) continue;
             int i = xor128() % nodeList[v].neighbors.size();
@@ -261,8 +261,8 @@ public:
     int calcScore() {
         int score = 0;
 
-        for (int i = 0; i < V - 1; i++) {
-            for (int j = i + 1; j < V; j++) {
+        for (int i = 1; i < V; i++) {
+            for (int j = i + 1; j <= V; j++) {
                 if (edgeMapGemb[vertexMapping[i]][vertexMapping[j]]) {
                     score += edgeWeight[i][j];
                 }
@@ -291,8 +291,8 @@ public:
     vector <Mapping> createAnswer() {
         vector <Mapping> ret;
 
-        for (int i = 0; i < V; i++) {
-            ret.push_back(Mapping(i + 1, vertexMapping[i] + 1));
+        for (int i = 1; i <= V; i++) {
+            ret.push_back(Mapping(i, vertexMapping[i] + 1));
         }
 
         return ret;
@@ -306,7 +306,7 @@ int main() {
     cin >> V >> E;
     for (int i = 0; i < E; i++) {
         cin >> u >> v >> w;
-        G.push_back(Edge(u - 1, v - 1, w));
+        G.push_back(Edge(u, v, w));
     }
 
     int a, b;
@@ -314,7 +314,7 @@ int main() {
     cin >> V_emb >> E_emb;
     for (int i = 0; i < E_emb; i++) {
         cin >> a >> b;
-        G_emb.push_back(Edge(a - 1, b - 1));
+        G_emb.push_back(Edge(a, b));
     }
 
     AtCoder ac;
