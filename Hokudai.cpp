@@ -110,7 +110,7 @@ public:
             edgeWeight[edge.from][edge.to] = edge.weight;
             edgeWeight[edge.to][edge.from] = edge.weight;
 
-            for (int j = 0; j < edge.weight; j++) {
+            for (int j = 0; j < edge.weight/3; j++) {
                 nodeList[edge.from].neighbors.push_back(edge.to);
                 nodeList[edge.to].neighbors.push_back(edge.from);
             }
