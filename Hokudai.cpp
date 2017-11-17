@@ -83,7 +83,7 @@ bool edgeMapG[MAX_V][MAX_V];
 bool edgeMapGemb[MAX_V_EMB][MAX_V_EMB];
 int vertexMapGemb[MAX_N][MAX_N];
 int vertexMapping[MAX_V];
-int edgeWeight[MAX_V][MAX_V];
+char edgeWeight[MAX_V][MAX_V];
 Coord coordList[MAX_V_EMB];
 vector <Node> nodeList;
 
