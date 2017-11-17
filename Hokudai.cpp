@@ -10,8 +10,8 @@ using namespace std;
 typedef long long ll;
 
 const int MAX_N = 60;
-const int MAX_V = 500;
-const int MAX_V_EMB = 3600;
+const int MAX_V = 501;
+const int MAX_V_EMB = 3601;
 
 double TIME_LIMIT = 10.0;
 const ll CYCLE_PER_SEC = 2700000000;
@@ -92,8 +92,8 @@ public:
     void init(vector <Edge> G, vector <Edge> G_emb) {
         memset(edgeMapG, false, sizeof(edgeMapG));
         memset(edgeMapGemb, false, sizeof(edgeMapGemb));
-        memset(vertexMapGemb, -1, sizeof(vertexMapGemb));
-        memset(vertexMapping, -1, sizeof(vertexMapping));
+        memset(vertexMapGemb, 0, sizeof(vertexMapGemb));
+        memset(vertexMapping, 0, sizeof(vertexMapping));
         memset(edgeWeight, 0, sizeof(edgeWeight));
         N = (int) sqrt(V_emb);
 
@@ -140,7 +140,7 @@ public:
             int maxId = -1;
 
             for (int j = 1; j <= V; j++) {
-                if (vertexMapping[j] != -1) continue;
+                if (vertexMapping[j] != 0) continue;
 
                 vertexMapping[j] = z;
                 vertexMapGemb[y][x] = j;
@@ -152,8 +152,8 @@ public:
                     maxId = j;
                 }
 
-                vertexMapping[j] = -1;
-                vertexMapGemb[y][x] = -1;
+                vertexMapping[j] = 0;
+                vertexMapGemb[y][x] = 0;
             }
 
             vertexMapping[maxId] = z;
@@ -205,7 +205,7 @@ public:
             int u = vertexMapGemb[y][x];
 
             int diffScore = calcScoreSub(v) + calcScoreSub(u);
-            if (u == -1) {
+            if (u == 0) {
                 moveVertex(v, z);
             } else {
                 swapVertexMapping(v, u);
@@ -222,7 +222,7 @@ public:
             if (currentScore < score || (diffScore < 30 && xor128() % R < R * exp(-diffScore / (k * remainTime)))) {
                 currentScore = score;
             } else {
-                if (u == -1) {
+                if (u == 0) {
                     moveVertex(v, t);
                 } else {
                     swapVertexMapping(v, u);
@@ -242,7 +242,7 @@ public:
         Coord c1 = coordList[z];
         Coord c2 = coordList[t];
         vertexMapGemb[c1.y][c1.x] = v;
-        vertexMapGemb[c2.y][c2.x] = -1;
+        vertexMapGemb[c2.y][c2.x] = 0;
     }
 
     void swapVertexMapping(int i, int j) {
@@ -273,7 +273,7 @@ public:
     }
 
     int calcScoreSub(int v) {
-        if (v == -1) return 0;
+        if (v == 0) return 0;
         int score = 0;
         Coord c = coordList[vertexMapping[v]];
 
@@ -281,7 +281,6 @@ public:
             int ny = c.y + DY[i];
             int nx = c.x + DX[i];
             if (ny < 0 || ny >= N || nx < 0 || nx >= N) continue;
-            if (vertexMapGemb[ny][nx] == -1) continue;
             score += edgeWeight[v][vertexMapGemb[ny][nx]];
         }
 
