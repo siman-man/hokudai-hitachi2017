@@ -85,7 +85,7 @@ int vertexMapGemb[MAX_N][MAX_N];
 int vertexMapping[MAX_V];
 int edgeWeight[MAX_V][MAX_V];
 Coord coordList[MAX_V_EMB];
-vector<Node> nodeList;
+vector <Node> nodeList;
 
 class AtCoder {
 public:
@@ -185,7 +185,7 @@ public:
         ll tryCount = 0;
         int R = 500000;
         double k = 4.5;
-        int DD[8] = {-N-1, -N, -N+1, -1, 1, N-1, N, N+1};
+        int DD[8] = {-N - 1, -N, -N + 1, -1, 1, N - 1, N, N + 1};
 
         int currentScore = bestScore;
 
