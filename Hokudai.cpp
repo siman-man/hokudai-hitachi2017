@@ -197,7 +197,7 @@ public:
                 remainTime = (TIME_LIMIT - currentTime) / TIME_LIMIT;
 
                 for (int i = 0; i < thread; i++) {
-                    expCache[i] = -1.0;
+                    expCache[i] = R * exp(-i / (k * remainTime));
                 }
             }
 
@@ -226,10 +226,6 @@ public:
             if (bestScore < score) {
                 bestScore = score;
                 memcpy(bestVertexMapping, vertexMapping, sizeof(vertexMapping));
-            }
-
-            if (expCache[diffScore] == -1 && currentScore >= score && diffScore < thread) {
-                expCache[diffScore] = R * exp(-diffScore / (k * remainTime));
             }
 
             if (currentScore < score || (diffScore < thread && xor128() % R < expCache[diffScore])) {
