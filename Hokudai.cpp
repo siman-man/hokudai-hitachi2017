@@ -79,7 +79,6 @@ int E, E_emb;
 int N;
 ll startCycle;
 
-bool edgeMapG[MAX_V][MAX_V];
 bool edgeMapGemb[MAX_V_EMB][MAX_V_EMB];
 int vertexMapGemb[MAX_N][MAX_N];
 int vertexMapping[MAX_V];
@@ -90,7 +89,6 @@ vector <Node> nodeList;
 class AtCoder {
 public:
     void init(vector <Edge> G, vector <Edge> G_emb) {
-        memset(edgeMapG, false, sizeof(edgeMapG));
         memset(edgeMapGemb, false, sizeof(edgeMapGemb));
         memset(vertexMapGemb, 0, sizeof(vertexMapGemb));
         memset(vertexMapping, 0, sizeof(vertexMapping));
