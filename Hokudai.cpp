@@ -128,34 +128,13 @@ public:
 
         int offset = (N - n) / 2;
         int y = offset;
-        int x = 1 + offset;
-        vertexMapping[1] = offset * N + offset;
-        vertexMapGemb[offset][offset] = 1;
+        int x = offset;
 
-        for (int i = 2; i <= V; i++) {
+        for (int i = 1; i <= V; i++) {
             int z = y * N + x;
-            int maxScore = -1;
-            int maxId = -1;
 
-            for (int j = 1; j <= V; j++) {
-                if (vertexMapping[j] != 0) continue;
-
-                vertexMapping[j] = z;
-                vertexMapGemb[y][x] = j;
-
-                int score = calcScoreSub(j);
-                assert(score >= 0);
-                if (maxScore < score) {
-                    maxScore = score;
-                    maxId = j;
-                }
-
-                vertexMapping[j] = 0;
-                vertexMapGemb[y][x] = 0;
-            }
-
-            vertexMapping[maxId] = z;
-            vertexMapGemb[y][x] = maxId;
+            vertexMapping[i] = z;
+            vertexMapGemb[y][x] = i;
 
             x++;
             if (x == n + offset) {
