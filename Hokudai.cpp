@@ -13,7 +13,7 @@ const int MAX_N = 60;
 const int MAX_V = 501;
 const int MAX_V_EMB = MAX_N * MAX_N + 1;
 
-double TIME_LIMIT = 10.0;
+double TIME_LIMIT = 10.2;
 const ll CYCLE_PER_SEC = 2700000000;
 
 const int DY[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
