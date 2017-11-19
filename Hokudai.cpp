@@ -11,7 +11,7 @@ typedef long long ll;
 
 const int MAX_N = 60;
 const int MAX_V = 501;
-const int MAX_V_EMB = 3601;
+const int MAX_V_EMB = MAX_N * MAX_N + 1;
 
 double TIME_LIMIT = 10.0;
 const ll CYCLE_PER_SEC = 2700000000;
