@@ -184,19 +184,17 @@ public:
             int i = xor128() % nodeList[v].neighbors.size();
             int j = xor128() % 8;
             int z = vertexMapping[nodeList[v].neighbors[i]] + DD[j];
-            if (t == z) continue;
-            int y = z / N;
-            int x = z % N;
-            if (y < 0 || y >= N || x < 0 || x >= N) continue;
-            int u = vertexMapGemb[y][x];
+            if (t == z || z < 0 || z >= N * N) continue;
+            Coord c = coordList[z];
+            int u = vertexMapGemb[c.y][c.x];
 
-            int diffScore = calcScoreSub(v) + calcScoreSub(u);
+            int diffScore = calcScoreSub(v, t) + calcScoreSub(u, z);
             if (u == 0) {
                 moveVertex(v, z);
             } else {
                 swapVertexMapping(v, u);
             }
-            diffScore -= calcScoreSub(v) + calcScoreSub(u);
+            diffScore -= calcScoreSub(v, z) + calcScoreSub(u, t);
 
             int score = currentScore - diffScore;
 
@@ -258,10 +256,10 @@ public:
         return score;
     }
 
-    int calcScoreSub(int v) {
+    int calcScoreSub(int v, int z) {
         if (v == 0) return 0;
         int score = 0;
-        Coord c = coordList[vertexMapping[v]];
+        Coord c = coordList[z];
 
         for (int i = 0; i < 8; i++) {
             int ny = c.y + DY[i];
