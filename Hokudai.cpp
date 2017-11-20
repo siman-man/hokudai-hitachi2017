@@ -50,10 +50,6 @@ struct Edge {
     }
 };
 
-struct Node {
-    vector<int> neighbors;
-};
-
 struct Mapping {
     int from;
     int to;
@@ -84,7 +80,7 @@ int vertexMapGemb[MAX_N][MAX_N];
 int vertexMapping[MAX_V];
 char edgeWeight[MAX_V][MAX_V];
 Coord coordList[MAX_V_EMB];
-vector <Node> nodeList;
+vector <Edge> edgeList;
 
 class AtCoder {
 public:
@@ -99,18 +95,14 @@ public:
 
         fprintf(stderr, "V = %d, n = %d, N = %d\n", V, n, N);
 
-        for (int i = 0; i <= V; i++) {
-            nodeList.push_back(Node());
-        }
-
         for (int i = 0; i < E; i++) {
             Edge edge = G[i];
             edgeWeight[edge.from][edge.to] = edge.weight;
             edgeWeight[edge.to][edge.from] = edge.weight;
 
             for (int j = 0; j < edge.weight / 5; j++) {
-                nodeList[edge.from].neighbors.push_back(edge.to);
-                nodeList[edge.to].neighbors.push_back(edge.from);
+                edgeList.push_back(Edge(edge.from, edge.to));
+                edgeList.push_back(Edge(edge.to, edge.from));
             }
         }
 
@@ -148,7 +140,9 @@ public:
         startCycle = getCycle();
         init(G, G_emb);
 
-        mappingVertex();
+        if (edgeList.size() > 0) {
+            mappingVertex();
+        }
 
         return createAnswer();
     }
@@ -166,6 +160,7 @@ public:
 
         int currentScore = bestScore;
         int thread = 25;
+        int es = edgeList.size();
         double expCache[thread];
 
         while (currentTime < TIME_LIMIT) {
@@ -178,12 +173,12 @@ public:
                 }
             }
 
-            int v = xor128() % V + 1;
+            int e = xor128() % es;
+            Edge edge = edgeList[e];
+            int v = edge.from;
             int t = vertexMapping[v];
-            if (nodeList[v].neighbors.size() == 0) continue;
-            int i = xor128() % nodeList[v].neighbors.size();
             int j = xor128() % 8;
-            int z = vertexMapping[nodeList[v].neighbors[i]] + DD[j];
+            int z = vertexMapping[edge.to] + DD[j];
             if (t == z || z < 0 || z >= N * N) continue;
             Coord c = coordList[z];
             int u = vertexMapGemb[c.y][c.x];
