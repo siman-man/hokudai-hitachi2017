@@ -155,7 +155,7 @@ public:
         double remainTime = 0.0;
         ll tryCount = 0;
         int R = 500000;
-        double k = 4.5;
+        double k = 5.0;
         int DD[8] = {-N - 1, -N, -N + 1, -1, 1, N - 1, N, N + 1};
 
         int currentScore = bestScore;
