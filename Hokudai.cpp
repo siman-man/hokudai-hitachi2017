@@ -100,7 +100,7 @@ public:
             edgeWeight[edge.from][edge.to] = edge.weight;
             edgeWeight[edge.to][edge.from] = edge.weight;
 
-            for (int j = 0; j < edge.weight / 5; j++) {
+            for (int j = 0; j < edge.weight / 4; j++) {
                 edgeList.push_back(Edge(edge.from, edge.to));
                 edgeList.push_back(Edge(edge.to, edge.from));
             }
@@ -163,7 +163,11 @@ public:
         int es = edgeList.size();
         double expCache[thread];
 
+        random_shuffle(edgeList.begin(), edgeList.end());
+        int cnt = 0;
+
         while (currentTime < TIME_LIMIT) {
+            cnt++;
             if (tryCount % 100000 == 0) {
                 currentTime = getTime(startCycle);
                 remainTime = (TIME_LIMIT - currentTime) / TIME_LIMIT;
@@ -173,7 +177,7 @@ public:
                 }
             }
 
-            int e = xor128() % es;
+            int e = cnt % es;
             Edge edge = edgeList[e];
             int v = edge.from;
             int t = vertexMapping[v];
