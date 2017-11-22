@@ -173,7 +173,7 @@ public:
                 remainTime = (TIME_LIMIT - currentTime) / TIME_LIMIT;
 
                 for (int i = 0; i < thread; i++) {
-                    expCache[i] = R * exp(-i / (k * remainTime));
+                    expCache[i] = R * exp(-i / (k * sqrt (remainTime)));
                 }
             }
 
