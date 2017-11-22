@@ -24,8 +24,8 @@ task one: [:compile] do
   if ENV["debug"]
     sh("time java -jar #{TESTER} -seed #{SEED} -debug -novis -exec './#{PROBLEM_NAME}'")
   else
-    sh("time ./#{PROBLEM_NAME} < testcases/#{TEST_TYPE}_testcase_#{SEED}.in > result.txt")
-    sh("./score_evaluator.out testcases/#{TEST_TYPE}_testcase_#{SEED}.in result.txt")
+    sh("time ./#{PROBLEM_NAME} < testcases/testcase_#{SEED}.in > result.txt")
+    sh("./score_evaluator.out testcases/testcase_#{SEED}.in result.txt")
   end
 end
 
@@ -58,7 +58,7 @@ end
 
 desc "system test"
 task final: [:compile] do
-  run_test(2001..3000)
+  run_test(1001..2000)
 end
 
 desc "system test production"
@@ -78,8 +78,8 @@ def run_test(seeds)
       file.puts("----- !BEGIN! ------")
       file.puts("Seed = #{seed}")
 
-      sh("./#{PROBLEM_NAME} < testcases/#{TEST_TYPE}_testcase_#{seed}.in > output")
-      data = Open3.capture3("./score_evaluator.out testcases/#{TEST_TYPE}_testcase_#{seed}.in output")
+      sh("./#{PROBLEM_NAME} < testcases/testcase_#{seed}.in > output")
+      data = Open3.capture3("./score_evaluator.out testcases/testcase_#{seed}.in output")
       file.puts(data.select { |d| d.is_a?(String) }.flat_map { |d| d.split("\n") })
       file.puts("----- !END! ------")
     end
