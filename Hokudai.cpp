@@ -159,7 +159,7 @@ public:
         int DD[8] = {-N - 1, -N, -N + 1, -1, 1, N - 1, N, N + 1};
 
         int currentScore = bestScore;
-        int thread = 25;
+        int thread = 30;
         int es = edgeList.size();
         double expCache[thread];
 
