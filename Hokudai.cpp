@@ -9,7 +9,7 @@
 using namespace std;
 typedef long long ll;
 
-const int MAX_N = 60;
+const int MAX_N = 61;
 const int MAX_V = 501;
 const int MAX_V_EMB = MAX_N * MAX_N + 1;
 
