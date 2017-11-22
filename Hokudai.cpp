@@ -158,8 +158,6 @@ public:
         if (edgeList.size() > 0) {
             mappingVertex();
         }
-        int score = calcScore();
-        fprintf(stderr, "score = %d\n", score);
 
         return createAnswer();
     }
