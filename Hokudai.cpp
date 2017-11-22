@@ -9,7 +9,7 @@
 using namespace std;
 typedef long long ll;
 
-const int MAX_N = 61;
+const int MAX_N = 63;
 const int MAX_V = 501;
 const int MAX_V_EMB = MAX_N * MAX_N + 1;
 
@@ -76,24 +76,45 @@ int N;
 ll startCycle;
 
 bool edgeMapGemb[MAX_V_EMB][MAX_V_EMB];
-int vertexMapGemb[MAX_N][MAX_N];
+int vertexMapGemb[MAX_V_EMB];
 int vertexMapping[MAX_V];
 char edgeWeight[MAX_V][MAX_V];
 Coord coordList[MAX_V_EMB];
 vector <Edge> edgeList;
+bool invalidField[MAX_V_EMB];
 
 class AtCoder {
 public:
-    void init(vector <Edge> G, vector <Edge> G_emb) {
+    void init(vector <Edge> G) {
         memset(edgeMapGemb, false, sizeof(edgeMapGemb));
         memset(vertexMapGemb, 0, sizeof(vertexMapGemb));
         memset(vertexMapping, 0, sizeof(vertexMapping));
         memset(edgeWeight, 0, sizeof(edgeWeight));
-        N = (int) sqrt(V_emb);
+        memset(invalidField, false, sizeof(invalidField));
+        N = (int) sqrt(V_emb) + 2;
 
         int n = (int) ceil(sqrt(V));
 
         fprintf(stderr, "V = %d, n = %d, N = %d\n", V, n, N);
+
+        for (int y = 0; y < N; y++) {
+            for (int x = 0; x < N; x++) {
+                int z = y * N + x;
+
+                if (y == 0 || x == 0 || y == N - 1 || x == N - 1) {
+                    invalidField[z] = true;
+                }
+
+                for (int i = 0; i < 8; i++) {
+                    int ny = y + DY[i];
+                    int nx = x + DX[i];
+                    if (ny < 0 || ny >= N || nx < 0 || nx >= N) continue;
+                    int nz = ny * N + nx;
+                    edgeMapGemb[z][nz] = true;
+                    edgeMapGemb[nz][z] = true;
+                }
+            }
+        }
 
         for (int i = 0; i < E; i++) {
             Edge edge = G[i];
@@ -104,12 +125,6 @@ public:
                 edgeList.push_back(Edge(edge.from, edge.to));
                 edgeList.push_back(Edge(edge.to, edge.from));
             }
-        }
-
-        for (int i = 0; i < E_emb; i++) {
-            Edge edge = G_emb[i];
-            edgeMapGemb[edge.from][edge.to] = true;
-            edgeMapGemb[edge.to][edge.from] = true;
         }
 
         for (int i = 0; i < MAX_V_EMB; i++) {
@@ -126,7 +141,7 @@ public:
             int z = y * N + x;
 
             vertexMapping[i] = z;
-            vertexMapGemb[y][x] = i;
+            vertexMapGemb[z] = i;
 
             x++;
             if (x == n + offset) {
@@ -136,13 +151,15 @@ public:
         }
     }
 
-    vector <Mapping> mapping(vector <Edge> G, vector <Edge> G_emb) {
+    vector <Mapping> mapping(vector <Edge> G) {
         startCycle = getCycle();
-        init(G, G_emb);
+        init(G);
 
         if (edgeList.size() > 0) {
             mappingVertex();
         }
+        int score = calcScore();
+        fprintf(stderr, "score = %d\n", score);
 
         return createAnswer();
     }
@@ -183,9 +200,9 @@ public:
             int t = vertexMapping[v];
             int j = xor128() % 8;
             int z = vertexMapping[edge.to] + DD[j];
-            if (t == z || z < 0 || z >= N * N) continue;
-            Coord c = coordList[z];
-            int u = vertexMapGemb[c.y][c.x];
+            if (invalidField[z]) continue;
+            if (t == z) continue;
+            int u = vertexMapGemb[z];
 
             int diffScore = calcScoreSub(v, t) + calcScoreSub(u, z);
             if (u == 0) {
@@ -222,10 +239,9 @@ public:
     void moveVertex(int v, int z) {
         int t = vertexMapping[v];
         vertexMapping[v] = z;
-        Coord c1 = coordList[z];
-        Coord c2 = coordList[t];
-        vertexMapGemb[c1.y][c1.x] = v;
-        vertexMapGemb[c2.y][c2.x] = 0;
+
+        vertexMapGemb[z] = v;
+        vertexMapGemb[t] = 0;
     }
 
     void swapVertexMapping(int i, int j) {
@@ -234,11 +250,8 @@ public:
         vertexMapping[i] = s;
         vertexMapping[j] = t;
 
-        Coord c1 = coordList[t];
-        Coord c2 = coordList[s];
-
-        vertexMapGemb[c1.y][c1.x] = j;
-        vertexMapGemb[c2.y][c2.x] = i;
+        vertexMapGemb[t] = j;
+        vertexMapGemb[s] = i;
     }
 
     int calcScore() {
@@ -258,14 +271,11 @@ public:
     int calcScoreSub(int v, int z) {
         if (v == 0) return 0;
         int score = 0;
-        Coord c = coordList[z];
+        int DD[8] = {-N - 1, -N, -N + 1, -1, 1, N - 1, N, N + 1};
 
         for (int i = 0; i < 8; i++) {
-            int ny = c.y + DY[i];
-            int nx = c.x + DX[i];
-            // FIXME: テストケースに依存しているので直す
-            // if (ny < 0 || ny >= N || nx < 0 || nx >= N) continue;
-            score += edgeWeight[v][vertexMapGemb[ny][nx]];
+            int nz = z + DD[i];
+            score += edgeWeight[v][vertexMapGemb[nz]];
         }
 
         return score;
@@ -275,7 +285,10 @@ public:
         vector <Mapping> ret;
 
         for (int i = 1; i <= V; i++) {
-            ret.push_back(Mapping(i, vertexMapping[i] + 1));
+            int z = vertexMapping[i];
+            int y = z / N - 1;
+            int x = z % N - 1;
+            ret.push_back(Mapping(i, y * (N - 2) + x + 1));
         }
 
         return ret;
@@ -301,7 +314,7 @@ int main() {
     }
 
     AtCoder ac;
-    vector <Mapping> mapping = ac.mapping(G, G_emb);
+    vector <Mapping> mapping = ac.mapping(G);
 
     int n = mapping.size();
     for (int i = 0; i < n; i++) {
