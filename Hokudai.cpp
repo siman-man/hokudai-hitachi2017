@@ -180,6 +180,8 @@ public:
 
         random_shuffle(edgeList.begin(), edgeList.end());
         int cnt = 0;
+        int j, z;
+        int diffScore;
 
         while (currentTime < TIME_LIMIT) {
             cnt++;
@@ -188,7 +190,7 @@ public:
                 remainTime = (TIME_LIMIT - currentTime) / TIME_LIMIT;
 
                 for (int i = 0; i < thread; i++) {
-                    expCache[i] = R * exp(-i / (k * sqrt (remainTime)));
+                    expCache[i] = R * exp(-i / (k * sqrt(remainTime)));
                 }
             }
 
@@ -196,19 +198,21 @@ public:
             Edge edge = edgeList[e];
             int v = edge.from;
             int t = vertexMapping[v];
-            int j = xor128() % 8;
-            int z = vertexMapping[edge.to] + DD[j];
-            if (invalidField[z]) continue;
-            if (t == z) continue;
+            do {
+                j = xor128() % 8;
+                z = vertexMapping[edge.to] + DD[j];
+            } while (invalidField[z] || t == z);
             int u = vertexMapGemb[z];
 
-            int diffScore = calcScoreSub(v, t) + calcScoreSub(u, z);
             if (u == 0) {
+                diffScore = calcScoreSub(v, t);
                 moveVertex(v, z);
+                diffScore -= calcScoreSub(v, z);
             } else {
+                diffScore = calcScoreSub(v, t) + calcScoreSub(u, z);
                 swapVertexMapping(v, u);
+                diffScore -= calcScoreSub(v, z) + calcScoreSub(u, t);
             }
-            diffScore -= calcScoreSub(v, z) + calcScoreSub(u, t);
 
             int score = currentScore - diffScore;
 
@@ -267,7 +271,6 @@ public:
     }
 
     int calcScoreSub(int v, int z) {
-        if (v == 0) return 0;
         int score = 0;
         int DD[8] = {-N - 1, -N, -N + 1, -1, 1, N - 1, N, N + 1};
 
@@ -299,7 +302,7 @@ int main() {
     vector <Edge> G;
     cin >> V >> E;
     for (int i = 0; i < E; i++) {
-        cin >> u >> v >> w;
+        scanf("%d %d %d", &u, &v, &w);
         G.push_back(Edge(u, v, w));
     }
 
@@ -307,7 +310,7 @@ int main() {
     vector <Edge> G_emb;
     cin >> V_emb >> E_emb;
     for (int i = 0; i < E_emb; i++) {
-        cin >> a >> b;
+        scanf("%d %d", &a, &b);
         G_emb.push_back(Edge(a, b));
     }
 
