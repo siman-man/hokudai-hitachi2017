@@ -168,7 +168,7 @@ public:
         memcpy(bestVertexMapping, vertexMapping, sizeof(vertexMapping));
         double currentTime = getTime(startCycle);
         double remainTime = 0.0;
-        ll tryCount = 0;
+        int tryCount = 0;
         int R = 500000;
         double k = 5.0;
         int DD[8] = {-N - 1, -N, -N + 1, -1, 1, N - 1, N, N + 1};
@@ -235,7 +235,7 @@ public:
         }
 
         memcpy(vertexMapping, bestVertexMapping, sizeof(bestVertexMapping));
-        fprintf(stderr, "BestScore = %d, tryCount = %lld\n", bestScore, tryCount);
+        fprintf(stderr, "BestScore = %d, tryCount = %d\n", bestScore, tryCount);
     }
 
     void moveVertex(int v, int z) {
