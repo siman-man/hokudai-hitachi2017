@@ -272,12 +272,17 @@ public:
 
     int calcScoreSub(int v, int z) {
         int score = 0;
-        int DD[8] = {-N - 1, -N, -N + 1, -1, 1, N - 1, N, N + 1};
 
-        for (int i = 0; i < 8; i++) {
-            int nz = z + DD[i];
-            score += edgeWeight[v][vertexMapGemb[nz]];
-        }
+        score += edgeWeight[v][vertexMapGemb[z - N - 1]];
+        score += edgeWeight[v][vertexMapGemb[z - N]];
+        score += edgeWeight[v][vertexMapGemb[z - N + 1]];
+
+        score += edgeWeight[v][vertexMapGemb[z - 1]];
+        score += edgeWeight[v][vertexMapGemb[z + 1]];
+
+        score += edgeWeight[v][vertexMapGemb[z + N - 1]];
+        score += edgeWeight[v][vertexMapGemb[z + N]];
+        score += edgeWeight[v][vertexMapGemb[z + N + 1]];
 
         return score;
     }
