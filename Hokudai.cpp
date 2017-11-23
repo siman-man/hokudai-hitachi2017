@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <cmath>
+#include <queue>
 #include <cassert>
 #include <string.h>
 #include <vector>
@@ -48,6 +49,14 @@ struct Edge {
         this->to = to;
         this->weight = weight;
     }
+
+    bool operator>(const Edge &e) const {
+        return weight < e.weight;
+    }
+};
+
+struct Node {
+    vector <Edge> edges;
 };
 
 struct Mapping {
@@ -81,6 +90,7 @@ int vertexMapping[MAX_V];
 char edgeWeight[MAX_V][MAX_V];
 Coord coordList[MAX_V_EMB];
 vector <Edge> edgeList;
+Node nodeList[MAX_V];
 bool invalidField[MAX_V_EMB];
 
 class AtCoder {
@@ -120,10 +130,28 @@ public:
             Edge edge = G[i];
             edgeWeight[edge.from][edge.to] = edge.weight;
             edgeWeight[edge.to][edge.from] = edge.weight;
+            nodeList[edge.from].edges.push_back(edge);
+            nodeList[edge.to].edges.push_back(edge);
+        }
 
-            for (int j = 0; j < edge.weight / 4; j++) {
-                edgeList.push_back(Edge(edge.from, edge.to));
-                edgeList.push_back(Edge(edge.to, edge.from));
+        for (int v = 1; v <= V; v++) {
+            Node node = nodeList[v];
+            priority_queue <Edge, vector<Edge>, greater<Edge>> pque;
+
+            for (int i = 0; i < node.edges.size(); i++) {
+                pque.push(node.edges[i]);
+            }
+
+            int limit = max(12, (int) (node.edges.size() * 0.15));
+
+            for (int n = 0; n < limit && !pque.empty(); n++) {
+                Edge edge = pque.top();
+                pque.pop();
+
+                for (int j = 0; j < edge.weight; j++) {
+                    edgeList.push_back(Edge(edge.from, edge.to));
+                    edgeList.push_back(Edge(edge.to, edge.from));
+                }
             }
         }
 
