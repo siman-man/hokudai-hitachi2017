@@ -242,15 +242,13 @@ public:
                 diffScore -= calcScoreSub(v, z) + calcScoreSub(u, t);
             }
 
-            int score = currentScore - diffScore;
+            if (diffScore < 0 || (diffScore < thread && xor128() % R < expCache[diffScore])) {
+                currentScore -= diffScore;
 
-            if (bestScore < score) {
-                bestScore = score;
-                memcpy(bestVertexMapping, vertexMapping, sizeof(vertexMapping));
-            }
-
-            if (currentScore < score || (diffScore < thread && xor128() % R < expCache[diffScore])) {
-                currentScore = score;
+                if (bestScore < currentScore) {
+                    bestScore = currentScore;
+                    memcpy(bestVertexMapping, vertexMapping, sizeof(vertexMapping));
+                }
             } else {
                 if (u == 0) {
                     moveVertex(v, t);
