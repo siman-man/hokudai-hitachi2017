@@ -69,16 +69,6 @@ struct Mapping {
     }
 };
 
-struct Coord {
-    int y;
-    int x;
-
-    Coord(int y = -1, int x = -1) {
-        this->y = y;
-        this->x = x;
-    }
-};
-
 int V, V_emb;
 int E, E_emb;
 int N;
@@ -88,7 +78,6 @@ bool edgeMapGemb[MAX_V_EMB][MAX_V_EMB];
 int vertexMapGemb[MAX_V_EMB];
 int vertexMapping[MAX_V];
 char edgeWeight[MAX_V][MAX_V];
-Coord coordList[MAX_V_EMB];
 vector <Edge> edgeList;
 Node nodeList[MAX_V];
 bool invalidField[MAX_V_EMB];
@@ -153,12 +142,6 @@ public:
                     edgeList.push_back(Edge(edge.to, edge.from));
                 }
             }
-        }
-
-        for (int i = 0; i < MAX_V_EMB; i++) {
-            int y = i / N;
-            int x = i % N;
-            coordList[i] = Coord(y, x);
         }
 
         int offset = (N - n) / 2;
